@@ -19,7 +19,7 @@ class LatestProductManager:
 
 
 class LatestProduct:
-    object = LatestProductManager()
+    objects = LatestProductManager()
 
 
 class Category(models.Model):
