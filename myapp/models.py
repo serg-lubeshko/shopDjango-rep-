@@ -6,10 +6,10 @@ from django.db import models
 User = get_user_model()
 
 
-class LatestProductManager:
+class LatestProductsManager:
 
     @staticmethod
-    def get_products_for_main_page(self, *args, **kwargs):
+    def get_products_for_main_page(*args, **kwargs):
         products = []
         ct_models = ContentType.objects.filter(model__in=args)
         for ct_model in ct_models:
@@ -18,8 +18,8 @@ class LatestProductManager:
         return products
 
 
-class LatestProduct:
-    objects = LatestProductManager()
+class LatestProducts:
+    objects = LatestProductsManager()
 
 
 class Category(models.Model):
