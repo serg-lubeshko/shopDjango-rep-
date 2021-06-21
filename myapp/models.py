@@ -1,9 +1,19 @@
+from PIL import Image
+from io import BytesIO
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
 User = get_user_model()
+
+
+class MinResolutionImages(Exception):
+    pass
+
+
+class MaxResolutionImages(Exception):
+    pass
 
 
 class LatestProductsManager:
@@ -31,6 +41,10 @@ class Category(models.Model):
 
 
 class Product(models.Model):
+    MIN_RESOLUTION = (100, 100)
+    MAX_RESOLUTION = (800, 800)
+    MAX_SIZE = 3145728
+
     class Meta:
         abstract = True
 
@@ -43,6 +57,29 @@ class Product(models.Model):
 
     def __str__(self):
         return self.title
+
+    # перед сохранением проверяем размер
+    # def __save__(self, *args, **kwargs):
+    #     images = self.cleaned_data['image']
+    #     im = Image.open(images)
+    #     width, height = im.size
+    #     min_width, min_height = self.MIN_RESOLUTION
+    #     max_width, max_height = self.MAX_RESOLUTION
+    #     if width < min_width or height < min_height:
+    #         raise MinResolutionImages('Размер изображения должен быть больше 100х100')
+    #     if width > max_width or height > max_height:
+    #         raise MaxResolutionImages('Размер изображения должен быть меньше 800х800')
+    #     super().save(*args, **kwargs)
+
+    # перед сохранением CUT PICTURE
+    def __save__(self, *args, **kwargs):
+        images = self.image
+        im = Image.open(images)
+        new_im = im.convert("RGB")  # Убираем альфа канал и преобразуем в ргб
+        new_im_resize = new_im.resize((800, 800), resample=Image.ANTIALIAS)  # Обрезаем
+        filestreame = BytesIO()  # преобразуем изображение в поток данных байты
+        file_ = new_im_resize.save(filestreame, format="JPEG", quality=90)  # сохраним изображение в файл
+        
 
 
 class Notebook(Product):
