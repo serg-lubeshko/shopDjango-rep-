@@ -33,6 +33,7 @@ class NotebookAdminForm(ModelForm):
             raise ValidationError('Разрешение изображения должен быть меньше 800х800')
         if images.size > Product.MAX_SIZE:
             raise ValidationError('Размер изображения должно быть меньше 3М')
+        return images
 
 
 class NotebookCategoryChoiseField(forms.ModelChoiceField):

@@ -1,5 +1,6 @@
 from PIL import Image
 from io import BytesIO
+from sorl.thumbnail import ImageField, get_thumbnail
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
@@ -51,7 +52,7 @@ class Product(models.Model):
     category = models.ForeignKey(Category, verbose_name='Категория', on_delete=models.CASCADE)
     title = models.CharField(max_length=255, verbose_name='Наименование')
     slug = models.SlugField(unique=True)
-    image = models.ImageField(verbose_name='Изображение')
+    image = ImageField(upload_to='size')
     description = models.TextField(verbose_name='Описание', null=True)
     price = models.DecimalField(max_digits=9, decimal_places=2, verbose_name='Цена')
 
@@ -59,7 +60,7 @@ class Product(models.Model):
         return self.title
 
     # перед сохранением проверяем размер
-    # def __save__(self, *args, **kwargs):
+    # def save(self, *args, **kwargs):
     #     images = self.cleaned_data['image']
     #     im = Image.open(images)
     #     width, height = im.size
@@ -72,14 +73,16 @@ class Product(models.Model):
     #     super().save(*args, **kwargs)
 
     # перед сохранением CUT PICTURE
-    def __save__(self, *args, **kwargs):
-        images = self.image
-        im = Image.open(images)
-        new_im = im.convert("RGB")  # Убираем альфа канал и преобразуем в ргб
-        new_im_resize = new_im.resize((800, 800), resample=Image.ANTIALIAS)  # Обрезаем
-        filestreame = BytesIO()  # преобразуем изображение в поток данных байты
-        file_ = new_im_resize.save(filestreame, format="JPEG", quality=90)  # сохраним изображение в файл
-        
+    # def save(self, *args, **kwargs):
+    #     if self.image:
+    #         self.image = get_thumbnail(self.image,'100x100', crop='center',quality=99).name
+    #         print(self.image.size)
+    #     super().save(*args, **kwargs)
+    #     # im = Image.open(images)
+        # new_im = im.convert("RGB")  # Убираем альфа канал и преобразуем в ргб
+        # new_im_resize = new_im.resize((800, 800), resample=Image.ANTIALIAS)  # Обрезаем
+        # filestreame = BytesIO()  # преобразуем изображение в поток данных байты
+        # file_ = new_im_resize.save(filestreame, format="JPEG", quality=90)  # сохраним изображение в файл
 
 
 class Notebook(Product):
